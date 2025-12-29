@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+
+
+<head>
+
+    <meta charset="utf-8"/>
+    <title>
+
+        {% block title %}
+            App |
+
+            {# BASE HALF TITLE #}
+            {% block subtitle %}
+
+            {% endblock %}
+            {# --------------- #}
+
+        {% endblock %}
+
+
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="--"/>
+    <meta content="App" name="author"/>
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'core/images/logos/logo.png' %}">
+
+    {# BASE LINKS THAT ARE REQUIRED FOR CERTAIN PAGE #}
+    {% block css_up %}
+
+    {% endblock %}
+    {# --------------------------------------------- #}
+
+
+    <script src="{% static 'core/js/layout.js' %}"></script>
+    <link href="{% static 'core/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'core/css/icons.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'core/css/app.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'core/css/custom.min.css' %}" rel="stylesheet" type="text/css"/>
+
+    {# BASE LINKS THAT ARE REQUIRED FOR CERTAIN PAGE #}
+    {% block css_down %}
+
+    {% endblock %}
+
+</head>
+
+<body class="bg-effect">
+{% block only-body %}
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+        <!-- Header start -->
+        {% if request.user.is_authenticated %}
+            {% include 'include/header.html' %}
+        {% endif %}
+        <!-- Header End -->
+
+        {% include 'include/remove_model.html' %}
+
+        <!-- Left Sidebar start -->
+        {% include 'include/sidebar.html' %}
+        <!-- Left Sidebar End -->
+
+        <!-- Vertical Overlay-->
+        <div class="vertical-overlay"></div>
+
+        {% block dont_include_details %}
+            <div class="main-content">
+                <div class="page-content">
+
+                    {% block content %}
+
+                    {% endblock %}
+
+                </div>
+            </div>
+
+        {% endblock %}
+
+        <!-- END layout-wrapper -->
+    </div>
+
+    <!--start back-to-top-->
+    <button onclick="topFunction()" class="btn btn-danger btn-icon" id="back-to-top">
+        <i class="ri-arrow-up-line"></i>
+    </button>
+    <!--end back-to-top-->
+    
+    <!--preloader-->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner-border text-primary avatar-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+{#    {% include 'include/theme_setting.html' %}#}
+
+{% endblock only-body %}
+
+<script src="{% static 'core/js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'core/libs/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'core/libs/simplebar/simplebar.min.js' %}"></script>
+<script src="{% static 'core/libs/node-waves/waves.min.js' %}"></script>
+<script src="{% static 'core/libs/feather-icons/feather.min.js' %}"></script>
+<script src="{% static 'core/js/pages/plugins/lord-icon-2.1.0.js' %}"></script>
+<script src="{% static 'core/js/plugins.js' %}"></script>
+<script src="{% static 'core/js/toastify.js' %}"></script>
+
+{% include 'messages.html' %}
+
+
+{# BASE INTERNAL SCRIPTS OR LINKS THAT ARE REQUIRED IN PAGE #}
+{% block js %}
+
+{% endblock %}
+{# -------------------------------------------------------- #}
+
+<script src="{% static 'core/js/app.js' %}"></script>
+<script src="{% static 'core/js/form-handlers.js' %}"></script>
+
+</body>
+</html>
+
+{# BASE INTERNAL SCRIPTS OR LINKS THAT ARE REQUIRED IN PAGE #}
+{% block js-code %}
+
+{% endblock %}
+{# -------------------------------------------------------- #}

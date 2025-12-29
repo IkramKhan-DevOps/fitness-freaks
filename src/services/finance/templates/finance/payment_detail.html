@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load core_tags %}
+{% load humanize %}
+
+{% block subtitle %}
+    Payment #{{ object.pk }} Details
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Payment #{{ object.pk }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'finance:payment_list' %}">Payments</a></li>
+                    <li class="breadcrumb-item active">#{{ object.pk }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'finance:payment_list' %}" class="btn btn-outline-secondary">
+                <i class="bx bx-arrow-back"></i> Back
+            </a>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bx bx-printer"></i> Print Receipt
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Payment Receipt Card -->
+            <div class="card shadow-sm" id="receipt">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="bx bx-dumbbell"></i> FITNESS FREAKS GYM</h4>
+                    <p class="mb-0 small">Payment Receipt</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <h6 class="text-muted">Receipt No.</h6>
+                            <p class="fw-bold">#{{ object.pk }}</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <h6 class="text-muted">Payment Date</h6>
+                            <p class="fw-bold">{{ object.payment_date|date:"M d, Y - h:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Member Details</h6>
+                            <p class="mb-1"><strong>{{ object.member.user.get_full_name|default:object.member.user.email }}</strong></p>
+                            <p class="mb-1">{{ object.member.user.email }}</p>
+                            {% if object.member.user.phone_number %}
+                            <p class="mb-0">{{ object.member.user.phone_number }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Subscription Period</h6>
+                            {% if object.period_start and object.period_end %}
+                            <p class="mb-1"><strong>From:</strong> {{ object.period_start|date:"M d, Y" }}</p>
+                            <p class="mb-0"><strong>To:</strong> {{ object.period_end|date:"M d, Y" }}</p>
+                            {% else %}
+                            <p class="text-muted">-</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {% if object.subscription_plan %}
+                                        {{ object.subscription_plan.name }} ({{ object.subscription_plan.duration_days }} days)
+                                    {% else %}
+                                        Gym Membership Fee
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">PKR {{ object.amount|intcomma }}</td>
+                            </tr>
+                            {% if object.discount > 0 %}
+                            <tr class="text-danger">
+                                <td>Discount</td>
+                                <td class="text-end">- PKR {{ object.discount|intcomma }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th>Total Paid</th>
+                                <th class="text-end fs-5">PKR {{ object.net_amount|intcomma }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Payment Method:</strong> {{ object.get_payment_method_display }}</p>
+                            {% if object.reference_number %}
+                            <p class="mb-1"><strong>Reference No:</strong> {{ object.reference_number }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="badge fs-6 {% if object.status == 'paid' %}bg-success{% elif object.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ object.get_status_display|upper }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if object.notes %}
+                    <hr>
+                    <p class="mb-0"><strong>Notes:</strong> {{ object.notes }}</p>
+                    {% endif %}
+
+                    {% if object.received_by %}
+                    <hr>
+                    <p class="text-muted small mb-0">
+                        <strong>Received by:</strong> {{ object.received_by.get_full_name|default:object.received_by.email }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center text-muted small">
+                    Thank you for choosing Fitness Freaks Gym!
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-info-circle"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'finance:member_detail' pk=object.member.pk %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bx bx-user"></i> View Member Profile
+                    </a>
+                    <a href="{% url 'finance:payment_list' %}?search={{ object.member.user.email }}" class="btn btn-outline-secondary w-100">
+                        <i class="bx bx-history"></i> Member Payment History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style media="print">
+    .btn, .card-header h5, nav, .breadcrumb { display: none !important; }
+    .card { border: none !important; box-shadow: none !important; }
+</style>
+{% endblock %}
+

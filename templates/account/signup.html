@@ -1,0 +1,55 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+{% load account socialaccount %}
+{% load static %}
+{% load socialaccount %}
+{% load crispy_forms_tags %}
+
+{% block subtitle %}Registration{% endblock %}
+
+
+{% block content %}
+
+    <div class="card border-0 bg-grey mt-4 rounded-20">
+
+        <div class="card-body p-4">
+            <div class="text-center border-bottom">
+                <h3 class="shadow-text mb-4">Registration</h3>
+            </div>
+            <div class="p-2 mt-3">
+
+                <form class="login row" id="login_form" method="POST"
+                      action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+
+                    {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}"
+                               value="{{ redirect_field_value }}"/>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <button class="btn rounded-pill btn-primary waves-effect waves-light w-100 btn-pd-10"
+                                type="submit">
+                            Register
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        <!-- end card body -->
+    </div>
+
+    <div class="mt-4 text-center">
+        <p class="mb-0">
+            Already have an account?
+            <a href="{% url 'account_signup' %}"
+               class="fw-semibold text-decoration-underline">
+                Login
+            </a>
+        </p>
+    </div>
+
+{% endblock %}

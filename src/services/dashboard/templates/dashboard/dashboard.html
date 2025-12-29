@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block subtitle %} Dashboard {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0 fw-bold">Gym Dashboard</h4>
+                    <p class="text-muted mb-0">Welcome back, {{ request.user.first_name|default:request.user.email }}!</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'finance:member_create' %}" class="btn btn-primary">
+                        <i class="bx bx-user-plus"></i> New Member
+                    </a>
+                    <a href="{% url 'finance:payment_create' %}" class="btn btn-success">
+                        <i class="bx bx-money"></i> Collect Fee
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row 1: Members -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm">
+                                <span class="avatar-title rounded-circle bg-primary bg-soft text-primary">
+                                    <i class="bx bx-group fs-4"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium mb-1">Total Members</p>
+                            <h4 class="mb-0">{{ total_members|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm">
+                                <span class="avatar-title rounded-circle bg-success bg-soft text-success">
+                                    <i class="bx bx-user-check fs-4"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium mb-1">Active Members</p>
+                            <h4 class="mb-0 text-success">{{ active_members|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm">
+                                <span class="avatar-title rounded-circle bg-danger bg-soft text-danger">
+                                    <i class="bx bx-user-x fs-4"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium mb-1">Expired Members</p>
+                            <h4 class="mb-0 text-danger">{{ expired_members|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm">
+                                <span class="avatar-title rounded-circle bg-warning bg-soft text-warning">
+                                    <i class="bx bx-time-five fs-4"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium mb-1">Expiring Soon</p>
+                            <h4 class="mb-0 text-warning">{{ expiring_soon|intcomma }}</h4>
+                            <small class="text-muted">Next 7 days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row 2: Revenue -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-white-50 mb-1">Today's Collection</p>
+                            <h3 class="mb-0">PKR {{ revenue_today|intcomma }}</h3>
+                            <small class="text-white-50">{{ payments_today }} payment(s)</small>
+                        </div>
+                        <div>
+                            <i class="bx bx-wallet-alt fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-white-50 mb-1">This Month Revenue</p>
+                            <h3 class="mb-0">PKR {{ revenue_month|intcomma }}</h3>
+                            <small class="text-white-50">{{ payments_month }} payment(s)</small>
+                        </div>
+                        <div>
+                            <i class="bx bx-trending-up fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-white-50 mb-1">Month Expenses</p>
+                            <h3 class="mb-0">PKR {{ expenses_month|intcomma }}</h3>
+                        </div>
+                        <div>
+                            <i class="bx bx-trending-down fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border-0 {% if net_profit_month >= 0 %}bg-info{% else %}bg-secondary{% endif %} text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-white-50 mb-1">Net Profit (Month)</p>
+                            <h3 class="mb-0">PKR {{ net_profit_month|intcomma }}</h3>
+                        </div>
+                        <div>
+                            <i class="bx bx-calculator fs-1 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Tables Row -->
+    <div class="row">
+        <!-- Revenue Chart -->
+        <div class="col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-line-chart text-primary me-2"></i>Revenue vs Expenses</h5>
+                    <span class="badge bg-primary">Last 6 Months</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Distribution -->
+        <div class="col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bx bx-pie-chart-alt-2 text-primary me-2"></i>Active Plans</h5>
+                </div>
+                <div class="card-body">
+                    {% if plan_distribution %}
+                    <canvas id="planChart" height="200"></canvas>
+                    <hr>
+                    <ul class="list-group list-group-flush">
+                        {% for plan in plan_distribution %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            {{ plan.name }}
+                            <span class="badge bg-primary rounded-pill">{{ plan.member_count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bx bx-info-circle text-muted fs-1"></i>
+                        <p class="text-muted mb-0">No active plans yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts & Recent Activity Row -->
+    <div class="row">
+        <!-- Expiring Soon Alert -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-alarm-exclamation me-2"></i>Expiring in 7 Days</h5>
+                    <a href="{% url 'finance:member_list' %}?expiring_soon=true" class="btn btn-sm btn-outline-dark">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if expiring_members %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Plan</th>
+                                    <th>Expires</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in expiring_members %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ member.user.get_full_name|default:member.user.email }}</strong>
+                                        <br><small class="text-muted">{{ member.user.phone_number|default:"" }}</small>
+                                    </td>
+                                    <td>{{ member.subscription_plan.name|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">{{ member.subscription_end|date:"M d" }}</span>
+                                        <br><small>{{ member.days_remaining }} days left</small>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'finance:member_detail' pk=member.pk %}" class="btn btn-sm btn-success">
+                                            <i class="bx bx-refresh"></i> Renew
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bx bx-check-circle text-success fs-1"></i>
+                        <p class="text-muted mb-0">No members expiring soon</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bx bx-receipt text-success me-2"></i>Recent Payments</h5>
+                    <a href="{% url 'finance:payment_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_payments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in recent_payments %}
+                                <tr>
+                                    <td>{{ payment.member.user.get_full_name|default:payment.member.user.email|truncatechars:20 }}</td>
+                                    <td><strong class="text-success">PKR {{ payment.amount|intcomma }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ payment.get_payment_method_display }}</span>
+                                    </td>
+                                    <td>{{ payment.payment_date|date:"M d, h:i A" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bx bx-info-circle text-muted fs-1"></i>
+                        <p class="text-muted mb-0">No recent payments</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Year Stats Summary -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Year Revenue</h6>
+                            <h4 class="text-success mb-0">PKR {{ revenue_year|intcomma }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Year Expenses</h6>
+                            <h4 class="text-danger mb-0">PKR {{ expenses_year|intcomma }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Year Net Profit</h6>
+                            <h4 class="{% if net_profit_year >= 0 %}text-primary{% else %}text-danger{% endif %} mb-0">PKR {{ net_profit_year|intcomma }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">New Members (Month)</h6>
+                            <h4 class="text-info mb-0">{{ new_members_month|intcomma }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Revenue vs Expenses Chart
+const revenueCtx = document.getElementById('revenueChart');
+if (revenueCtx) {
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Revenue (PKR)',
+                data: {{ chart_revenue|safe }},
+                borderColor: 'rgb(75, 192, 92)',
+                backgroundColor: 'rgba(75, 192, 92, 0.1)',
+                tension: 0.3,
+                fill: true
+            }, {
+                label: 'Expenses (PKR)',
+                data: {{ chart_expenses|safe }},
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'PKR ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Plan Distribution Chart
+const planCtx = document.getElementById('planChart');
+if (planCtx) {
+    const planData = [
+        {% for plan in plan_distribution %}
+        {{ plan.member_count }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const planLabels = [
+        {% for plan in plan_distribution %}
+        "{{ plan.name }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    new Chart(planCtx, {
+        type: 'doughnut',
+        data: {
+            labels: planLabels,
+            datasets: [{
+                data: planData,
+                backgroundColor: [
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 206, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(255, 99, 132)',
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
