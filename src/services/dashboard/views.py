@@ -7,6 +7,7 @@ from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from decimal import Decimal
+import json
 
 from src.services.accounts.decorators import staff_required_decorator
 
@@ -88,28 +89,46 @@ def get_dashboard_statistics():
     ).values('name', 'member_count').order_by('-member_count')
 
     # Monthly Revenue Chart Data (last 6 months)
-    six_months_ago = today - timedelta(days=180)
+    # Generate last 6 months list
+    months_list = []
+    for i in range(5, -1, -1):  # 5, 4, 3, 2, 1, 0
+        if i == 0:
+            month_date = today.replace(day=1)
+        else:
+            # Calculate months back
+            year = today.year
+            month = today.month - i
+            while month <= 0:
+                month += 12
+                year -= 1
+            month_date = today.replace(year=year, month=month, day=1)
+        months_list.append(month_date)
+
+    stats['chart_labels'] = [m.strftime('%b %Y') for m in months_list]
+
+    # Get revenue data
     monthly_revenue = paid_payments.filter(
-        payment_date__date__gte=six_months_ago
+        payment_date__date__gte=months_list[0]
     ).annotate(
         month=TruncMonth('payment_date')
     ).values('month').annotate(
         total=Sum('amount')
     ).order_by('month')
 
-    stats['chart_labels'] = [item['month'].strftime('%b %Y') for item in monthly_revenue]
-    stats['chart_revenue'] = [float(item['total']) for item in monthly_revenue]
+    revenue_dict = {item['month'].replace(day=1): float(item['total']) for item in monthly_revenue}
+    stats['chart_revenue'] = [revenue_dict.get(m, 0) for m in months_list]
 
     # Monthly Expenses Chart Data
     monthly_expenses = Expense.objects.filter(
-        expense_date__gte=six_months_ago
+        expense_date__gte=months_list[0]
     ).annotate(
         month=TruncMonth('expense_date')
     ).values('month').annotate(
         total=Sum('amount')
     ).order_by('month')
 
-    stats['chart_expenses'] = [float(item['total']) for item in monthly_expenses]
+    expenses_dict = {item['month'].replace(day=1): float(item['total']) for item in monthly_expenses}
+    stats['chart_expenses'] = [expenses_dict.get(m, 0) for m in months_list]
 
     # Payment Method Distribution
     stats['payment_methods'] = paid_payments.filter(
@@ -135,7 +154,14 @@ class DashboardView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
-        context.update(get_dashboard_statistics())
+        stats = get_dashboard_statistics()
+
+        # Serialize chart data as JSON to ensure proper JavaScript formatting
+        stats['chart_labels_json'] = json.dumps(stats.get('chart_labels', []))
+        stats['chart_revenue_json'] = json.dumps(stats.get('chart_revenue', []))
+        stats['chart_expenses_json'] = json.dumps(stats.get('chart_expenses', []))
+
+        context.update(stats)
         return context
 
 
