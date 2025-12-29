@@ -142,6 +142,18 @@ chmod +x docs/bash/*.sh
 
 ---
 
+```bash
+# Generate fake data
+bash docs/bash/faker.sh
+
+# Clear existing data and regenerate
+bash docs/bash/faker.sh --clear
+
+# Or run Python directly
+python docs/bash/generate_fake_data.py
+python docs/bash/generate_fake_data.py --clear
+```
+
 ## 🗄️ Database Migrations
 
 ### Run migrations for all apps:
